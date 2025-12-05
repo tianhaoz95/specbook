@@ -114,5 +114,37 @@ void main() {
         '@main.dart',
       );
     });
+
+    testWidgets('Editor content auto-saves and loads correctly', (
+      WidgetTester tester,
+    ) async {
+      // Mock SharedPreferences to return some initial content
+      SharedPreferences.setMockInitialValues({
+        'commands': [],
+        'githubRepos': [],
+        'editorContent': 'Initial saved content',
+      });
+
+      await tester.pumpWidget(
+        Provider(create: (_) => SettingsService(), child: const MyApp()),
+      );
+
+      // Verify that the initial content is loaded
+      expect(find.text('Initial saved content'), findsOneWidget);
+
+      // Simulate typing new content
+      await tester.enterText(find.byType(TextField), 'New typed content');
+      await tester.pump();
+
+      // Simulate app restart by re-pumping the widget
+      await tester.pumpWidget(
+        Provider(create: (_) => SettingsService(), child: const MyApp()),
+      );
+      // Wait for any async operations (like loading content) to complete
+      await tester.pumpAndSettle();
+
+      // Verify that the new content is loaded after "restart"
+      expect(find.text('New typed content'), findsOneWidget);
+    });
   });
 }

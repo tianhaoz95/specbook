@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:myapp/models/command.dart';
 import 'package:myapp/models/github_repo.dart';
 import 'package:myapp/services/settings_service.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
 
 class EditorScreen extends StatefulWidget {
   const EditorScreen({super.key});
@@ -22,11 +23,30 @@ class _EditorScreenState extends State<EditorScreen> {
   bool _showAutocomplete = false;
   String _autocompleteType = ''; // To distinguish between '/' and '@'
 
+  static const String _editorContentKey =
+      'editorContent'; // Key for SharedPreferences
+
   @override
   void initState() {
     super.initState();
+    _loadContent(); // Load saved content
     _controller.addListener(_onTextChanged);
     _loadAllAutocompleteData();
+  }
+
+  Future<void> _loadContent() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedContent = prefs.getString(_editorContentKey);
+    if (savedContent != null) {
+      _controller.removeListener(_onTextChanged); // Temporarily remove listener
+      _controller.text = savedContent;
+      _controller.addListener(_onTextChanged); // Re-add listener
+    }
+  }
+
+  Future<void> _saveContent() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_editorContentKey, _controller.text);
   }
 
   Future<void> _loadAllAutocompleteData() async {
@@ -39,6 +59,8 @@ class _EditorScreenState extends State<EditorScreen> {
   }
 
   void _onTextChanged() {
+    _saveContent(); // Auto-save content on text change
+
     final text = _controller.text;
     final cursorPos = _controller.selection.baseOffset;
 
