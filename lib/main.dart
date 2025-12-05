@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/screens/editor_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:myapp/services/settings_service.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    Provider(create: (context) => SettingsService(), child: const MyApp()),
+  );
 }
 
 class MyApp extends StatelessWidget {
