@@ -1,29 +1,34 @@
 # Mobile Spec Editor
 
-A mobile application designed to help developers write "spec for spec coding" on the go. This markdown editor provides enhanced autocomplete features for custom commands (`/`) and filenames from specified GitHub repositories (`@`). The goal is to streamline the spec writing process, allowing for easy transfer of generated specs to AI coding tools.
+A Flutter-based mobile application designed for developers to write "spec for spec coding" with ease. This markdown editor enhances productivity with powerful autocomplete features for custom commands (`/`) and file paths from configured GitHub repositories (`@`).
 
 ## Features
 
-- **Markdown Editor:** A full-screen text editor supporting markdown syntax.
-- **Customizable `/` Commands:** Users can define, edit, and delete custom commands for quick insertion via an autocomplete mechanism.
+- **Markdown Editor:** A simple, full-screen editor for writing specs in markdown.
+- **Auto-Saving:** Your work is automatically saved to your device as you type, so you never lose your progress.
+- **Customizable `/` Commands:**
+    - Define your own shorthand commands (e.g., `/bug`).
+    - Add, edit, and delete commands in the settings.
+    - Autocomplete suggestions appear as you type.
 - **GitHub Integration for `@` Commands:**
-    - Configure multiple GitHub repositories with Personal Access Tokens (PATs).
-    - Autocompletion for filenames from the specified repositories.
-    - Local caching of repository file lists for offline access and improved performance.
-    - Manual refresh option to update cached file lists.
-- **Auto-Saving:** Editor content is automatically saved to local storage, ensuring data persistence across sessions.
-- **Intuitive UI:** A clean, minimalist interface focused on the writing experience, with easy access to settings.
+    - Securely add multiple GitHub repositories using a URL (`owner/repo`) and a Personal Access Token (PAT).
+    - Get autocomplete suggestions for file paths within your repositories.
+    - Cached file lists for offline access and faster performance.
+    - Manually refresh the file list for any repository to keep it up-to-date.
+- **State Management:** Uses `provider` for efficient and scalable state management.
+- **Local Storage:** Leverages `shared_preferences` to persist settings and editor content.
+- **GitHub API:** Integrates with the GitHub API using the `http` package to fetch repository file lists.
 
 ## Getting Started
 
-To run this project:
+To get the project up and running on your local machine:
 
 1.  **Clone the repository:**
     ```bash
     git clone [repository_url]
-    cd mobile-spec-editor
+    cd myapp
     ```
-2.  **Get dependencies:**
+2.  **Install dependencies:**
     ```bash
     flutter pub get
     ```
@@ -34,7 +39,17 @@ To run this project:
 
 ## Usage
 
-- **Editor Screen:** Start writing your spec.
-- **`/` Autocomplete:** Type `/` to see suggestions for custom commands.
-- **`@` Autocomplete:** Type `@` to see suggestions for filenames from configured GitHub repositories.
-- **Settings:** Access the settings screen via the gear icon in the app bar to manage your custom commands and GitHub repositories.
+- **Writing Specs:** Open the app and start writing in the main editor.
+- **Using `/` Commands:** Type `/` to trigger the autocomplete overlay and see a list of your custom commands. Continue typing to filter the list.
+- **Using `@` Commands:** Type `@` to get file path suggestions from your configured GitHub repositories.
+- **Managing Settings:**
+    - Tap the settings icon in the app bar to navigate to the settings screen.
+    - In settings, you can:
+        - Add, edit, or delete your custom `/` commands.
+        - Navigate to the GitHub repository management screen.
+- **Managing GitHub Repositories:**
+    - From the settings screen, go to the GitHub repositories section.
+    - Here you can:
+        - Add a new repository with its URL and PAT.
+        - Edit or delete existing repositories.
+        - Manually trigger a refresh to fetch the latest file list for a repository.

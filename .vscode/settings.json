@@ -1,2 +1,5 @@
 {
+  "google.gemini.editor.showDocumentsOnEdit": false,
+  "google.gemini.terminal.showTerminalOnExecution": false,
+  "google.gemini.cli.editorIntegration": false
 }

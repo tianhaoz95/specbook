@@ -1,0 +1,13 @@
+{
+  "editorIntegration": {
+    "enabled": false
+  },
+  "mcp": {
+    "dart": {
+      "command": "dart",
+      "args": [
+        "mcp-server"
+      ]
+    }
+  }
+}
