@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:myapp/screens/settings_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/models/command.dart';
+import 'package:myapp/models/github_repo.dart';
 import 'package:myapp/services/settings_service.dart';
 
 class EditorScreen extends StatefulWidget {
@@ -15,45 +16,71 @@ class _EditorScreenState extends State<EditorScreen> {
   final TextEditingController _controller = TextEditingController();
   OverlayEntry? _overlayEntry;
   final LayerLink _layerLink = LayerLink();
-  List<Command> _suggestions = [];
+  List<dynamic> _suggestions = []; // Can be Command or String (for filenames)
   List<Command> _allCommands = [];
+  List<GitHubRepo> _allGitHubRepos = [];
   bool _showAutocomplete = false;
+  String _autocompleteType = ''; // To distinguish between '/' and '@'
 
   @override
   void initState() {
     super.initState();
     _controller.addListener(_onTextChanged);
-    _loadAllCommands();
+    _loadAllAutocompleteData();
   }
 
-  Future<void> _loadAllCommands() async {
-    _allCommands = await Provider.of<SettingsService>(
+  Future<void> _loadAllAutocompleteData() async {
+    final settingsService = Provider.of<SettingsService>(
       context,
       listen: false,
-    ).loadCommands();
+    );
+    _allCommands = await settingsService.loadCommands();
+    _allGitHubRepos = await settingsService.loadGitHubRepos();
   }
 
   void _onTextChanged() {
     final text = _controller.text;
     final cursorPos = _controller.selection.baseOffset;
 
-    if (cursorPos > 0 && text[cursorPos - 1] == '/') {
+    if (cursorPos == 0) {
+      _hideOverlay();
+      return;
+    }
+
+    final lastChar = text[cursorPos - 1];
+
+    if (lastChar == '/' || lastChar == '@') {
+      _autocompleteType = lastChar;
       _showAutocomplete = true;
-      _suggestions = _allCommands;
-      _showOverlay();
-    } else if (_showAutocomplete &&
-        cursorPos > 0 &&
-        text[cursorPos - 1].trim().isNotEmpty) {
-      final lastSlashIndex = text.lastIndexOf('/', cursorPos - 1);
-      if (lastSlashIndex != -1) {
-        final searchTerm = text
-            .substring(lastSlashIndex + 1, cursorPos)
-            .toLowerCase();
-        _suggestions = _allCommands
-            .where(
-              (command) => command.title.toLowerCase().contains(searchTerm),
-            )
+      if (_autocompleteType == '/') {
+        _suggestions = _allCommands;
+      } else if (_autocompleteType == '@') {
+        _suggestions = _allGitHubRepos
+            .expand((repo) => repo.cachedFiles)
             .toList();
+      }
+      _showOverlay();
+    } else if (_showAutocomplete) {
+      final lastTriggerIndex = text.lastIndexOf(
+        _autocompleteType,
+        cursorPos - 1,
+      );
+      if (lastTriggerIndex != -1) {
+        final searchTerm = text
+            .substring(lastTriggerIndex + 1, cursorPos)
+            .toLowerCase();
+        if (_autocompleteType == '/') {
+          _suggestions = _allCommands
+              .where(
+                (command) => command.title.toLowerCase().contains(searchTerm),
+              )
+              .toList();
+        } else if (_autocompleteType == '@') {
+          _suggestions = _allGitHubRepos
+              .expand((repo) => repo.cachedFiles)
+              .where((filename) => filename.toLowerCase().contains(searchTerm))
+              .toList();
+        }
         _showOverlay(); // Update overlay with filtered suggestions
       } else {
         _hideOverlay();
@@ -64,21 +91,24 @@ class _EditorScreenState extends State<EditorScreen> {
   }
 
   void _showOverlay() {
+    debugPrint('Showing overlay...');
     if (_overlayEntry == null) {
       _overlayEntry = _createOverlayEntry();
       Overlay.of(context).insert(_overlayEntry!);
     } else {
       _overlayEntry!.markNeedsBuild();
     }
-    setState(() {
-      _showAutocomplete = true;
-    });
+    if (mounted) {
+      setState(() {
+        _showAutocomplete = true;
+      });
+    }
   }
 
   void _hideOverlay() {
     if (_overlayEntry != null) {
       _overlayEntry!.remove();
-      _overlayEntry = null; // Set to null immediately after removing
+      _overlayEntry = null;
       if (mounted) {
         setState(() {
           _showAutocomplete = false;
@@ -96,18 +126,27 @@ class _EditorScreenState extends State<EditorScreen> {
           showWhenUnlinked: false,
           offset: const Offset(0.0, 50.0), // Adjust as needed
           child: Material(
+            key: const ValueKey(
+              'autocomplete_overlay_material',
+            ), // Add this key
             elevation: 4.0,
             child: ListView.builder(
               padding: EdgeInsets.zero,
               shrinkWrap: true,
               itemCount: _suggestions.length,
               itemBuilder: (context, index) {
-                final command = _suggestions[index];
+                final suggestion = _suggestions[index];
                 return ListTile(
-                  title: Text(command.title),
-                  subtitle: Text(command.description),
+                  title: Text(
+                    suggestion is Command
+                        ? suggestion.title
+                        : suggestion as String,
+                  ),
+                  subtitle: suggestion is Command
+                      ? Text(suggestion.description)
+                      : null,
                   onTap: () {
-                    _insertCommand(command);
+                    _insertSuggestion(suggestion);
                     _hideOverlay();
                   },
                 );
@@ -119,20 +158,30 @@ class _EditorScreenState extends State<EditorScreen> {
     );
   }
 
-  void _insertCommand(Command command) {
+  void _insertSuggestion(dynamic suggestion) {
     final text = _controller.text;
     final cursorPos = _controller.selection.baseOffset;
-    final lastSlashIndex = text.lastIndexOf('/', cursorPos - 1);
+    final lastTriggerIndex = text.lastIndexOf(_autocompleteType, cursorPos - 1);
 
-    if (lastSlashIndex != -1) {
+    if (lastTriggerIndex != -1) {
+      String insertText;
+      if (suggestion is Command) {
+        insertText = suggestion.title;
+      } else if (suggestion is String) {
+        insertText =
+            '$_autocompleteType$suggestion'; // Add the trigger character
+      } else {
+        return;
+      }
+
       final newText =
-          text.substring(0, lastSlashIndex + 1) +
-          command.title.substring(1) + // Insert without the leading slash
+          text.substring(0, lastTriggerIndex) +
+          insertText +
           text.substring(cursorPos);
       _controller.value = _controller.value.copyWith(
         text: newText,
         selection: TextSelection.collapsed(
-          offset: lastSlashIndex + command.title.length,
+          offset: lastTriggerIndex + insertText.length,
         ),
       );
     }
@@ -159,7 +208,7 @@ class _EditorScreenState extends State<EditorScreen> {
                 context,
                 MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
-              _loadAllCommands(); // Reload commands after returning from settings
+              _loadAllAutocompleteData(); // Reload commands and repos after returning from settings
             },
           ),
         ],

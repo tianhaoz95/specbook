@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/models/command.dart';
 import 'package:myapp/services/settings_service.dart';
+import 'package:myapp/screens/github_repo_settings_screen.dart'; // New import
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -113,51 +114,96 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
-      body: FutureBuilder<List<Command>>(
-        future: _commandsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No commands added yet.'));
-          } else {
-            final commands = snapshot.data!;
-            return ListView.builder(
-              itemCount: commands.length,
-              itemBuilder: (context, index) {
-                final command = commands[index];
-                return Dismissible(
-                  key: Key(command.title), // Unique key for Dismissible
-                  direction: DismissDirection.endToStart,
-                  background: Container(
-                    color: Colors.red,
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: const Icon(Icons.delete, color: Colors.white),
-                  ),
-                  onDismissed: (direction) {
-                    _deleteCommand(index);
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('${command.title} dismissed')),
-                    );
-                  },
-                  child: ListTile(
-                    title: Text(command.title),
-                    subtitle: Text(command.description),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () =>
-                          _showCommandDialog(command: command, index: index),
-                    ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Commands Section
+            ListTile(
+              title: const Text('Manage Commands'),
+              subtitle: const Text(
+                'Add, edit, or delete autocomplete commands',
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                // Navigate to a dedicated screen for commands if needed,
+                // or just show the current command list here.
+              },
+            ),
+            FutureBuilder<List<Command>>(
+              future: _commandsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('No commands added yet.'));
+                } else {
+                  final commands = snapshot.data!;
+                  return ListView.builder(
+                    shrinkWrap: true, // Important for nested list views
+                    physics:
+                        const NeverScrollableScrollPhysics(), // Disable scrolling for nested list
+                    itemCount: commands.length,
+                    itemBuilder: (context, index) {
+                      final command = commands[index];
+                      return Dismissible(
+                        key: Key(
+                          'command_${command.title}_$index',
+                        ), // Unique key for Dismissible
+                        direction: DismissDirection.endToStart,
+                        background: Container(
+                          color: Colors.red,
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                          child: const Icon(Icons.delete, color: Colors.white),
+                        ),
+                        onDismissed: (direction) {
+                          _deleteCommand(index);
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('${command.title} dismissed'),
+                            ),
+                          );
+                        },
+                        child: ListTile(
+                          title: Text(command.title),
+                          subtitle: Text(command.description),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () => _showCommandDialog(
+                              command: command,
+                              index: index,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }
+              },
+            ),
+            const Divider(),
+            // GitHub Repositories Section
+            ListTile(
+              title: const Text('Manage GitHub Repositories'),
+              subtitle: const Text(
+                'Add, edit, or delete GitHub repositories for file autocompletion',
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const GitHubRepoSettingsScreen(),
                   ),
                 );
+                _loadCommands(); // Reload commands in case they were modified while in GitHub settings
               },
-            );
-          }
-        },
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showCommandDialog(),

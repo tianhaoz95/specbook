@@ -2,10 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:myapp/screens/editor_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/services/settings_service.dart';
+import 'package:myapp/services/github_service.dart';
 
 void main() {
   runApp(
-    Provider(create: (context) => SettingsService(), child: const MyApp()),
+    MultiProvider(
+      providers: [
+        Provider(create: (context) => SettingsService()),
+        Provider(
+          create: (context) => GitHubService(context.read<SettingsService>()),
+        ),
+      ],
+      child: const MyApp(),
+    ),
   );
 }
 
