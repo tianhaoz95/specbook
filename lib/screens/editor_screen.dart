@@ -5,6 +5,7 @@ import 'package:myapp/models/command.dart';
 import 'package:myapp/models/github_repo.dart';
 import 'package:myapp/services/settings_service.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
+import 'package:share_plus/share_plus.dart';
 
 class EditorScreen extends StatefulWidget {
   const EditorScreen({super.key});
@@ -223,6 +224,12 @@ class _EditorScreenState extends State<EditorScreen> {
       appBar: AppBar(
         title: const Text('Spec Editor'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () {
+              Share.share(_controller.text);
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () async {
