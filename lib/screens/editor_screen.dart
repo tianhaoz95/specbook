@@ -227,7 +227,7 @@ class _EditorScreenState extends State<EditorScreen> {
           IconButton(
             icon: const Icon(Icons.share),
             onPressed: () {
-              Share.share(_controller.text);
+              SharePlus.instance.share(ShareParams(text: _controller.text));
             },
           ),
           IconButton(
