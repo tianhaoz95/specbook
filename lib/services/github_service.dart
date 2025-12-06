@@ -42,8 +42,12 @@ class GitHubService {
           'Failed to load repository files: ${response.statusCode} ${response.body}',
         );
       }
+    } on http.ClientException catch (e) {
+      throw Exception(
+        'Network error fetching repository files: Please check your internet connection. ($e)',
+      );
     } catch (e) {
-      throw Exception('Error fetching repository files: $e');
+      throw Exception('An unexpected error occurred: $e');
     }
   }
 
