@@ -143,9 +143,7 @@ class _ManageCommandsScreenState extends State<ManageCommandsScreen> {
                     _deleteCommand(index);
                     if (!mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${command.title} dismissed'),
-                      ),
+                      SnackBar(content: Text('${command.title} dismissed')),
                     );
                   },
                   child: ListTile(
@@ -153,10 +151,8 @@ class _ManageCommandsScreenState extends State<ManageCommandsScreen> {
                     subtitle: Text(command.description),
                     trailing: IconButton(
                       icon: const Icon(Icons.edit),
-                      onPressed: () => _showCommandDialog(
-                        command: command,
-                        index: index,
-                      ),
+                      onPressed: () =>
+                          _showCommandDialog(command: command, index: index),
                     ),
                   ),
                 );

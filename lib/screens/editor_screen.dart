@@ -153,27 +153,30 @@ class _EditorScreenState extends State<EditorScreen> {
               'autocomplete_overlay_material',
             ), // Add this key
             elevation: 4.0,
-            child: ListView.builder(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              itemCount: _suggestions.length,
-              itemBuilder: (context, index) {
-                final suggestion = _suggestions[index];
-                return ListTile(
-                  title: Text(
-                    suggestion is Command
-                        ? suggestion.title
-                        : suggestion as String,
-                  ),
-                  subtitle: suggestion is Command
-                      ? Text(suggestion.description)
-                      : null,
-                  onTap: () {
-                    _insertSuggestion(suggestion);
-                    _hideOverlay();
-                  },
-                );
-              },
+            child: Container(
+              constraints: const BoxConstraints(maxHeight: 200),
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: _suggestions.length,
+                itemBuilder: (context, index) {
+                  final suggestion = _suggestions[index];
+                  return ListTile(
+                    title: Text(
+                      suggestion is Command
+                          ? suggestion.title
+                          : suggestion as String,
+                    ),
+                    subtitle: suggestion is Command
+                        ? Text(suggestion.description)
+                        : null,
+                    onTap: () {
+                      _insertSuggestion(suggestion);
+                      _hideOverlay();
+                    },
+                  );
+                },
+              ),
             ),
           ),
         ),
