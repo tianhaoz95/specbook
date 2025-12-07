@@ -1,0 +1,1 @@
+go to Google Play Console web page, go into app SpecEditorGo, go to internal testing, click on "Edit release", click on "Next" button on the button right, and then click on "Save and Publish" and confirm

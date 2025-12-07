@@ -9,5 +9,10 @@
         "mcp-server"
       ]
     }
+  },
+  "mcpServers": {
+    "local-server": {
+      "httpUrl": "http://127.0.0.1:9100/mcp"
+    }
   }
 }

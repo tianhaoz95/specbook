@@ -6,6 +6,7 @@ import 'package:myapp/models/github_repo.dart';
 import 'package:myapp/services/settings_service.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
 import 'package:share_plus/share_plus.dart';
+import 'package:collection/collection.dart';
 
 class EditorScreen extends StatefulWidget {
   const EditorScreen({super.key});
@@ -23,6 +24,7 @@ class _EditorScreenState extends State<EditorScreen> {
   List<GitHubRepo> _allGitHubRepos = [];
   bool _showAutocomplete = false;
   String _autocompleteType = ''; // To distinguish between '/' and '@'
+  String? _activeRepoUrl;
 
   static const String _editorContentKey =
       'editorContent'; // Key for SharedPreferences
@@ -57,7 +59,18 @@ class _EditorScreenState extends State<EditorScreen> {
     );
     _allCommands = await settingsService.loadCommands();
     _allGitHubRepos = await settingsService.loadGitHubRepos();
+    await _loadActiveRepoUrl();
   }
+
+  Future<void> _loadActiveRepoUrl() async {
+    final settingsService = Provider.of<SettingsService>(
+      context,
+      listen: false,
+    );
+    _activeRepoUrl = await settingsService.getActiveGitHubRepoUrl();
+    setState(() {});
+  }
+
 
   void _onTextChanged() {
     _saveContent(); // Auto-save content on text change
@@ -78,9 +91,18 @@ class _EditorScreenState extends State<EditorScreen> {
       if (_autocompleteType == '/') {
         _suggestions = _allCommands;
       } else if (_autocompleteType == '@') {
-        _suggestions = _allGitHubRepos
-            .expand((repo) => repo.cachedFiles)
-            .toList();
+        if (_activeRepoUrl != null) {
+          final activeRepo = _allGitHubRepos.firstWhereOrNull(
+            (repo) => repo.url == _activeRepoUrl,
+          );
+          if (activeRepo != null) {
+            _suggestions = activeRepo.cachedFiles;
+          } else {
+            _suggestions = [];
+          }
+        } else {
+          _suggestions = [];
+        }
       }
       _showOverlay();
     } else if (_showAutocomplete) {
@@ -99,10 +121,22 @@ class _EditorScreenState extends State<EditorScreen> {
               )
               .toList();
         } else if (_autocompleteType == '@') {
-          _suggestions = _allGitHubRepos
-              .expand((repo) => repo.cachedFiles)
-              .where((filename) => filename.toLowerCase().contains(searchTerm))
-              .toList();
+          if (_activeRepoUrl != null) {
+            final activeRepo = _allGitHubRepos.firstWhereOrNull(
+              (repo) => repo.url == _activeRepoUrl,
+            );
+            if (activeRepo != null) {
+              _suggestions = activeRepo.cachedFiles
+                  .where(
+                    (filename) => filename.toLowerCase().contains(searchTerm),
+                  )
+                  .toList();
+            } else {
+              _suggestions = [];
+            }
+          } else {
+            _suggestions = [];
+          }
         }
         _showOverlay(); // Update overlay with filtered suggestions
       } else {
@@ -217,7 +251,10 @@ class _EditorScreenState extends State<EditorScreen> {
   void dispose() {
     _controller.removeListener(_onTextChanged);
     _controller.dispose();
-    _hideOverlay();
+    if (_overlayEntry != null) {
+      _overlayEntry!.remove();
+      _overlayEntry = null;
+    }
     super.dispose();
   }
 
@@ -227,6 +264,28 @@ class _EditorScreenState extends State<EditorScreen> {
       appBar: AppBar(
         title: const Text('Spec Editor'),
         actions: [
+          if (_allGitHubRepos.isNotEmpty)
+            DropdownButton<String>(
+              value: _activeRepoUrl,
+              hint: const Text('Select Repo'),
+              onChanged: (String? newValue) async {
+                if (newValue != null) {
+                  final settingsService = Provider.of<SettingsService>(
+                    context,
+                    listen: false,
+                  );
+                  await settingsService.setActiveGitHubRepoUrl(newValue);
+                  await _loadActiveRepoUrl();
+                }
+              },
+              items: _allGitHubRepos
+                  .map<DropdownMenuItem<String>>((GitHubRepo repo) {
+                return DropdownMenuItem<String>(
+                  value: repo.url,
+                  child: Text(repo.url),
+                );
+              }).toList(),
+            ),
           IconButton(
             icon: const Icon(Icons.share),
             onPressed: () {
@@ -240,7 +299,7 @@ class _EditorScreenState extends State<EditorScreen> {
                 context,
                 MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
-              _loadAllAutocompleteData(); // Reload commands and repos after returning from settings
+              await _loadAllAutocompleteData(); // Reload commands and repos after returning from settings
             },
           ),
         ],

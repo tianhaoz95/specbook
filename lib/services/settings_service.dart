@@ -5,6 +5,17 @@ import 'package:myapp/models/github_repo.dart';
 class SettingsService {
   static const String _commandsKey = 'commands';
   static const String _githubReposKey = 'githubRepos';
+  static const String _activeGitHubRepoUrlKey = 'activeGitHubRepoUrl';
+
+  Future<String?> getActiveGitHubRepoUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_activeGitHubRepoUrlKey);
+  }
+
+  Future<void> setActiveGitHubRepoUrl(String url) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_activeGitHubRepoUrlKey, url);
+  }
 
   Future<List<Command>> loadCommands() async {
     final prefs = await SharedPreferences.getInstance();

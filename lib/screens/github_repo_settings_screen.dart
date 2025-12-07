@@ -85,6 +85,8 @@ class _GitHubRepoSettingsScreenState extends State<GitHubRepoSettingsScreen> {
 
                 if (repo == null) {
                   currentRepos.add(newRepo);
+                  // Set the new repo as active
+                  await settingsService.setActiveGitHubRepoUrl(newRepo.url);
                 } else if (index != null) {
                   currentRepos[index] = newRepo;
                 }
