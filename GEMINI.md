@@ -40,3 +40,28 @@ The application uses the following key packages:
 - **State Management:** `Provider` is used for app-wide state management, making `SettingsService` and `GitHubService` accessible. `StatefulWidget` (`EditorScreen`, `SettingsScreen`, `GitHubRepoSettingsScreen`) manage local UI state.
 - **Separation of Concerns:** Logic is separated into `screens` (presentation), `models` (data structures), and `services` (business logic, data access).
 - **Data Flow:** Data flows from services (local storage, GitHub API) to models, then managed by providers, and consumed by UI widgets.
+
+## Android Release Process
+
+After any bug fix or feature development, follow these steps to create and upload a new Android release to the Google Play Console:
+
+1.  **Increment Build Number:**
+    -   Open `pubspec.yaml`.
+    -   Increase the build number (the number after the `+`). For example, change `version: 1.0.0+6` to `version: 1.0.0+7`.
+
+2.  **Build the Android App Bundle (AAB):**
+    -   Run the following command in your terminal:
+        ```bash
+        flutter build aab
+        ```
+
+3.  **Upload to Google Play Console:**
+    -   Navigate to the `android` directory:
+        ```bash
+        cd android
+        ```
+    -   Run the `fastlane internal` lane to upload the build to the internal testing track:
+        ```bash
+        fastlane internal
+        ```
+
