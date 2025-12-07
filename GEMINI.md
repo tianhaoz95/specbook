@@ -83,4 +83,6 @@ After successfully uploading the AAB via `fastlane internal`, follow these manua
 
 4.  **Confirm Publication:**
     -   A confirmation pop-up will appear. Confirm your action to publish the release to the internal testing track.
+## Controlling Browser via Local-Server MCP
 
+To control the browser and complete actions, utilize the local-server MCP (Multi-platform Control Protocol) integration. This allows for programmatic interaction with browser elements.

@@ -267,7 +267,8 @@ class _EditorScreenState extends State<EditorScreen> {
           if (_allGitHubRepos.isNotEmpty)
             DropdownButton<String>(
               value: _activeRepoUrl,
-              hint: const Text('Select Repo'),
+              hint: const Icon(Icons.folder_special_outlined),
+              underline: Container(),
               onChanged: (String? newValue) async {
                 if (newValue != null) {
                   final settingsService = Provider.of<SettingsService>(
@@ -278,11 +279,16 @@ class _EditorScreenState extends State<EditorScreen> {
                   await _loadActiveRepoUrl();
                 }
               },
+              selectedItemBuilder: (BuildContext context) {
+                return _allGitHubRepos.map<Widget>((GitHubRepo item) {
+                  return const Icon(Icons.folder_special_outlined);
+                }).toList();
+              },
               items: _allGitHubRepos
                   .map<DropdownMenuItem<String>>((GitHubRepo repo) {
                 return DropdownMenuItem<String>(
                   value: repo.url,
-                  child: Text(repo.url),
+                  child: Text(repo.url.split('/').sublist(3).join('/')),
                 );
               }).toList(),
             ),
