@@ -65,3 +65,22 @@ After any bug fix or feature development, follow these steps to create and uploa
         fastlane internal
         ```
 
+### Publishing the Release on Google Play Console
+
+After successfully uploading the AAB via `fastlane internal`, follow these manual steps to publish the release:
+
+1.  **Access Google Play Console:**
+    -   Go to the [Google Play Console](https://play.google.com/console).
+    -   Navigate to your application, `SpecEditorGo`.
+
+2.  **Edit the Release:**
+    -   In the left-hand menu, go to `Testing` -> `Internal testing`.
+    -   Locate and click on the "Edit release" button for the desired release.
+
+3.  **Review and Save:**
+    -   Review the release details on the subsequent pages, clicking "Next" to proceed through any sections (e.g., "Review release").
+    -   Click the "Save and publish" button (or similar wording, as UI might change) located at the bottom right.
+
+4.  **Confirm Publication:**
+    -   A confirmation pop-up will appear. Confirm your action to publish the release to the internal testing track.
+
