@@ -12,12 +12,21 @@ A Flutter-based mobile application designed for developers to write "spec for sp
     - Autocomplete suggestions appear as you type.
 - **GitHub Integration for `@` Commands:**
     - Securely add multiple GitHub repositories using a URL (`owner/repo`) and a Personal Access Token (PAT).
+    - Optionally provide a custom name for each repository for easier identification.
     - Get autocomplete suggestions for file paths within your repositories.
     - Cached file lists for offline access and faster performance.
     - Manually refresh the file list for any repository to keep it up-to-date.
 - **State Management:** Uses `provider` for efficient and scalable state management.
 - **Local Storage:** Leverages `shared_preferences` to persist settings and editor content.
 - **GitHub API:** Integrates with the GitHub API using the `http` package to fetch repository file lists.
+
+## Technology Stack
+
+- **Framework:** Flutter
+- **Language:** Dart
+- **State Management:** `provider`
+- **Local Storage:** `shared_preferences`
+- **API Communication:** `http`
 
 ## Getting Started
 
@@ -50,6 +59,6 @@ To get the project up and running on your local machine:
 - **Managing GitHub Repositories:**
     - From the settings screen, go to the GitHub repositories section.
     - Here you can:
-        - Add a new repository with its URL and PAT.
+        - Add a new repository with its URL and PAT, and an optional custom name.
         - Edit or delete existing repositories.
         - Manually trigger a refresh to fetch the latest file list for a repository.
