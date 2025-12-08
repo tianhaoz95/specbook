@@ -269,6 +269,7 @@ class _EditorScreenState extends State<EditorScreen> {
               value: _activeRepoUrl,
               hint: const Icon(Icons.folder_special_outlined),
               underline: Container(),
+              menuWidth: 240.0,
               onChanged: (String? newValue) async {
                 if (newValue != null) {
                   final settingsService = Provider.of<SettingsService>(
@@ -288,10 +289,15 @@ class _EditorScreenState extends State<EditorScreen> {
                   .map<DropdownMenuItem<String>>((GitHubRepo repo) {
                 return DropdownMenuItem<String>(
                   value: repo.url,
-                  child: Text(
-                    repo.url.startsWith('https://github.com/')
-                        ? repo.url.substring('https://github.com/'.length)
-                        : repo.url,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minWidth: 240.0), // Adjust as needed
+                    child: Text(
+                      repo.url.startsWith('https://github.com/')
+                          ? repo.url.substring('https://github.com/'.length)
+                          : repo.url,
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 );
               }).toList(),
