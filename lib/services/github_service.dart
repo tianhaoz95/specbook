@@ -10,8 +10,11 @@ class GitHubService {
 
   Future<List<String>> fetchRepositoryFiles(GitHubRepo repo) async {
     final List<String> files = [];
+    final repoPath = repo.url.startsWith('https://github.com/')
+        ? repo.url.substring('https://github.com/'.length)
+        : repo.url;
     final url = Uri.parse(
-      'https://api.github.com/repos/${repo.url}/git/trees/HEAD?recursive=1',
+      'https://api.github.com/repos/$repoPath/git/trees/HEAD?recursive=1',
     );
     final headers = {
       'Authorization': 'token ${repo.pat}',

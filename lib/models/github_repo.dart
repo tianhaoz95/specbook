@@ -19,7 +19,9 @@ class GitHubRepo {
   factory GitHubRepo.fromMap(Map<String, dynamic> json) => GitHubRepo(
     url: json["url"],
     pat: json["pat"],
-    cachedFiles: List<String>.from(json["cachedFiles"].map((x) => x)),
+    cachedFiles: json["cachedFiles"] == null
+        ? []
+        : List<String>.from(json["cachedFiles"].map((x) => x)),
   );
 
   Map<String, dynamic> toMap() => {

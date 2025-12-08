@@ -288,7 +288,11 @@ class _EditorScreenState extends State<EditorScreen> {
                   .map<DropdownMenuItem<String>>((GitHubRepo repo) {
                 return DropdownMenuItem<String>(
                   value: repo.url,
-                  child: Text(repo.url.split('/').sublist(3).join('/')),
+                  child: Text(
+                    repo.url.startsWith('https://github.com/')
+                        ? repo.url.substring('https://github.com/'.length)
+                        : repo.url,
+                  ),
                 );
               }).toList(),
             ),

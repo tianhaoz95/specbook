@@ -75,10 +75,11 @@ void main() {
       SharedPreferences.setMockInitialValues({
         'commands': [], // No commands for this test
         'githubRepos': [
-          '{"url":"owner/repo1","pat":"pat1","cachedFiles":["file1.md","src/file2.js"]}',
-          '{"url":"owner/repo2","pat":"pat2","cachedFiles":["main.dart","lib/utils.dart"]}',
+          '{"url":"https://github.com/owner/repo1","pat":"pat1","cachedFiles":["file1.md","src/file2.js"]}',
+          '{"url":"https://github.com/owner/repo2","pat":"pat2","cachedFiles":["main.dart","lib/utils.dart"]}',
         ],
-        'activeGitHubRepoUrl': 'owner/repo2', // Set repo2 as active
+        'activeGitHubRepoUrl':
+            'https://github.com/owner/repo2', // Set repo2 as active
       });
 
       await tester.pumpWidget(
