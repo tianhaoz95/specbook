@@ -31,6 +31,7 @@ class _GitHubRepoSettingsScreenState extends State<GitHubRepoSettingsScreen> {
   Future<void> _showRepoDialog({GitHubRepo? repo, int? index}) async {
     final urlController = TextEditingController(text: repo?.url);
     final patController = TextEditingController(text: repo?.pat);
+    final nameController = TextEditingController(text: repo?.name);
 
     return showDialog<void>(
       context: context,
@@ -55,6 +56,12 @@ class _GitHubRepoSettingsScreenState extends State<GitHubRepoSettingsScreen> {
                 ),
                 obscureText: true,
               ),
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Optional Name',
+                ),
+              ),
             ],
           ),
           actions: <Widget>[
@@ -71,9 +78,11 @@ class _GitHubRepoSettingsScreenState extends State<GitHubRepoSettingsScreen> {
                 final newRepo = GitHubRepo(
                   url: urlController.text,
                   pat: patController.text,
+                  name: nameController.text.isNotEmpty
+                      ? nameController.text
+                      : null,
                   cachedFiles:
-                      repo?.cachedFiles ??
-                      [], // Preserve cached files if editing
+                      repo?.cachedFiles ?? [], // Preserve cached files if editing
                 );
 
                 final settingsService = Provider.of<SettingsService>(
@@ -185,7 +194,7 @@ class _GitHubRepoSettingsScreenState extends State<GitHubRepoSettingsScreen> {
                     );
                   },
                   child: ListTile(
-                    title: Text(repo.url),
+                    title: Text(repo.name ?? repo.url),
                     subtitle: Text('Files cached: ${repo.cachedFiles.length}'),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,

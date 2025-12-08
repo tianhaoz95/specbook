@@ -292,9 +292,10 @@ class _EditorScreenState extends State<EditorScreen> {
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(minWidth: 240.0), // Adjust as needed
                     child: Text(
-                      repo.url.startsWith('https://github.com/')
-                          ? repo.url.substring('https://github.com/'.length)
-                          : repo.url,
+                      repo.name ??
+                          (repo.url.startsWith('https://github.com/')
+                              ? repo.url.substring('https://github.com/'.length)
+                              : repo.url),
                       softWrap: false,
                       overflow: TextOverflow.ellipsis,
                     ),
